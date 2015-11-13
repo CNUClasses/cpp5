@@ -51,56 +51,60 @@ void Controller::initialize(){
 void Controller::draw(){
 	clearScreen();
 
-	switch(mControllerState){
-	case RESET:
-		initialize();
-		mControllerState=RUN;
-		break;
+	switch(mControllerState) {
 
-	case SHOW_INTRO:
-		myInstructions.draw(myScreenVector);
-		break;
+		case RESET:
+			initialize();
+			mControllerState=RUN;
+			break;
 
-	case EXIT:
-		std::exit(0);
-		break;
+		case SHOW_INTRO:
+			myInstructions.draw(myScreenVector);
+			break;
 
-	case RUN:
-		//create a balloon if appropriate
-		createBalloon();
+		case EXIT:
+			std::exit(0);
+			break;
 
-		//render cosmo to screenbuffer
-		cosmo.draw(myScreenVector);
+		case RUN:
+
+			//create a balloon if appropriate
+			createBalloon();
+
+			//render cosmo to screenbuffer
+			cosmo.draw(myScreenVector);
 		
-		if (cosmo.getDir() == LEFT ) {
-			if (cosmo.getX() - 1 > 0) {
-				location myloc(cosmo.getX()-1,cosmo.getY());
-				cosmo.setLocation(myloc);
+			if (cosmo.getDir() == LEFT ) {
+				if (cosmo.getX() - 1 > 0) {
+					location myloc(cosmo.getX()-1,cosmo.getY());
+					cosmo.setLocation(myloc);
+				}
+			} else if (cosmo.getDir() == RIGHT) {
+				if (cosmo.getX() + 1 < 67) {
+					location myloc(cosmo.getX() + 1, cosmo.getY());
+					cosmo.setLocation(myloc);
+				}
 			}
-		} else if (cosmo.getDir() == RIGHT)
-			if (cosmo.getX() + 1 < 67) {
-				location myloc(cosmo.getX() + 1, cosmo.getY());
-				cosmo.setLocation(myloc);
+
+			//render balloons to screenbuffer
+			std::vector<Balloon>::iterator myIter = myBalloons.begin();
+			while ( myIter != myBalloons.end()){
+
+				//collisions
+				COLLISION col = hasCollidedWithCosmo((*myIter));
+
+				//if (col==COSMO_POPPED || col==BALLOON_CLOBBERED_COSMO)
+				myIter->setCollidedState(col);		
+
+				if ( myIter->draw(myScreenVector))
+					myIter = myBalloons.erase(myIter);
+				else
+					++myIter;
 			}
-		}
 
-		//render balloons to screenbuffer
-		std::vector<Balloon>::iterator myIter = myBalloons.begin();
-		while ( myIter != myBalloons.end()){
-			//collisions
-			COLLISION col = hasCollidedWithCosmo((*myIter));
-			//if (col==COSMO_POPPED || col==BALLOON_CLOBBERED_COSMO)
-			myIter->setCollidedState(col);		
-
-			if ( myIter->draw(myScreenVector))
-				myIter = myBalloons.erase(myIter);
-			else
-				++myIter;
-		}
-		//show score if keeping
-		renderScoresToScreenbuffer();
-		break;
-
+			//show score if keeping
+			renderScoresToScreenbuffer();
+			break;
 	
 	}
 
