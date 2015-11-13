@@ -51,40 +51,26 @@ void Controller::initialize(){
 void Controller::draw(){
 	clearScreen();
 
-	switch(mControllerState) {
+	switch(mControllerState){
+	case RESET:
+		initialize();
+		mControllerState=RUN;
+		break;
 
-		case RESET:
-			initialize();
-			mControllerState=RUN;
-			break;
+	case SHOW_INTRO:
+		myInstructions.draw(myScreenVector);
+		break;
 
-		case SHOW_INTRO:
-			myInstructions.draw(myScreenVector);
-			break;
+	case EXIT:
+		std::exit(0);
+		break;
 
-		case EXIT:
-			std::exit(0);
-			break;
+	case RUN:
+		//create a balloon if appropriate
+		createBalloon();
 
-		case RUN:
-
-			//create a balloon if appropriate
-			createBalloon();
-
-			//render cosmo to screenbuffer
-			cosmo.draw(myScreenVector);
-		
-			if (cosmo.getDir() == LEFT ) {
-				if (cosmo.getX() - 1 > 0) {
-					location myloc(cosmo.getX()-1,cosmo.getY());
-					cosmo.setLocation(myloc);
-				}
-			} else if (cosmo.getDir() == RIGHT) {
-				if (cosmo.getX() + 1 < 67) {
-					location myloc(cosmo.getX() + 1, cosmo.getY());
-					cosmo.setLocation(myloc);
-				}
-			}
+		//render cosmo to screenbuffer
+		cosmo.draw(myScreenVector);
 
 			//render balloons to screenbuffer
 			std::vector<Balloon>::iterator myIter = myBalloons.begin();
